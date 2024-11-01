@@ -16,6 +16,12 @@ const useFCM = () => {
       const fcmmessaging = messaging();
       const unsubscribe = onMessage(fcmmessaging, (payload) => {
         toast.dark(payload.notification?.title);
+        if (Notification.permission === 'granted') {
+          new Notification(payload.notification?.title!, {
+            body: payload.notification?.body,
+            icon: payload.notification?.icon,
+          });
+        }
         if (pathname === '/login') router.refresh();
         setMessages((fcmMessages) => [...fcmMessages, payload]);
       });
