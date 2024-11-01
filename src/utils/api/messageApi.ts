@@ -15,6 +15,7 @@ export async function getMessages(token: string, userid: string) {
   }
 
   const data = await response.json();
+  console.log("get message data : ", data);
   return data;
 }
 
@@ -79,5 +80,19 @@ export async function sendNotificationAll(
     const data = await response.json();
     return data;
   });
+}
 
+export async function updateMessage(_id: string) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/message/${_id}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch user data');
+  }
+
+  const data = await response.json();
+  return data;
 }
