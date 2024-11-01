@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 const EditProfile: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const { user, setUser } = useAuth();
   const [displayName, setDisplayName] = useState(user?.username || '');
+  const [notificationFlag, setNotificationFlag] = useState(user?.notificationsEnabled || false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -14,7 +15,7 @@ const EditProfile: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (user) {
       try {
         const token = localStorage.getItem("JWT");
-        const newUser = await updateUser(token!, user._id, displayName, user.fcmToken, true);
+        const newUser = await updateUser(token!, user._id, displayName, user.fcmToken, notificationFlag);
         setUser(newUser);
         toast.success("Profile update successfully!");
         onClose(); // Close the form after updating
@@ -34,6 +35,12 @@ const EditProfile: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           onChange={(e) => setDisplayName(e.target.value)}
           className="border rounded p-2 w-full"
           required
+        />
+        <input
+          type="radio"
+          checked={notificationFlag}
+          onChange={() => setNotificationFlag(!notificationFlag)}
+          className="text-blue-400 focus:ring-blue-500"
         />
       </div>
       <div className='flex justify-around'>
