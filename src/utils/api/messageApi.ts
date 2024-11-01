@@ -37,7 +37,7 @@ export async function sendNotification(
       },
       body: JSON.stringify({
         fcmToken,
-        userId,
+        userid: userId,
         title,
         body
       })
