@@ -8,14 +8,15 @@ export interface User {
   isAdmin: boolean;
 }
 
-export interface Message {
-  title: string;
-  body: string;
-  username: string;
-  isRead: boolean;
-}
-
 export interface LoginResponseType {
   access_token: string;
   userid: string;
+}
+
+export interface Message {
+  _id: string;
+  title: string;
+  body: string;
+  createdAt: string;
+  isRead: boolean;
 }

@@ -16,12 +16,13 @@ const useFCM = () => {
       const fcmmessaging = messaging();
       const unsubscribe = onMessage(fcmmessaging, (payload) => {
         toast.dark(payload.notification?.title);
-        if(pathname == '/login') router.refresh();
+        if (pathname === '/login') router.refresh();
         setMessages((messages) => [...messages, payload]);
       });
       return () => unsubscribe();
     }
-  }, [fcmToken]);
+  }, [fcmToken, pathname, router]);
+
   return { fcmToken, messages };
 };
 
