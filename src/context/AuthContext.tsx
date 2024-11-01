@@ -1,14 +1,15 @@
-"use client"
+"use client";
 import { createContext, useContext, useEffect, useState } from 'react';
 import { getUser, updateUser } from '@/utils/api/userApi';
 import { User } from '@/utils/types';
 import useFCM from '@/utils/hooks/useFCM';
+import { toast } from 'react-toastify';
 
 interface AuthContextProps {
   user: User | null;
   loading: boolean;
   isAdmin: boolean;
-  setUser: (user : User | null) => void;
+  setUser: (user: User | null) => void;
   setCurrentUser: (token: string, userid: string) => void;
   removeCurrentUser: () => void;
 }
@@ -19,87 +20,75 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const { fcmToken } = useFCM(); 
+  const { fcmToken } = useFCM();
 
+  // Effect to update user with FCM token when available
   useEffect(() => {
-    if (fcmToken && user) {
+    const updateFCMTokenForUser = async () => {
+      if (fcmToken && user) {
+        const token = localStorage.getItem("JWT");
+        const userid = localStorage.getItem("userId");
+        if (token && userid) {
+          await updateUser(token, userid, user.username, fcmToken, user.notificationsEnabled);
+        }
+      }
+    };
+    updateFCMTokenForUser();
+  }, [fcmToken, user]);
+
+  // Initial check and validation of user from localStorage
+  useEffect(() => {
+    const validateUser = async () => {
+      setLoading(true);
       const token = localStorage.getItem("JWT");
       const userid = localStorage.getItem("userId");
-      updateUser(token!, userid!, user.username, fcmToken, user.notificationsEnabled)
-    }
-  }, [fcmToken]);
 
-  useEffect(() => {
-    checkUserValidate();
-  }, []);
-
-  const checkUserValidate = async () => {
-    setLoading(true);
-    if (typeof window !== 'undefined') { // Ensure we are in the browser
-      const token = localStorage.getItem("JWT");
-      const userid = localStorage.getItem("userId");
-      
       if (token && userid) {
         try {
-          const user: User = await getUser(token, userid);
-          setUser(user);
-          setIsAdmin(user.isAdmin);
+          const fetchedUser: User = await getUser(token, userid);
+          setUser(fetchedUser);
+          setIsAdmin(fetchedUser.isAdmin);
         } catch (error) {
-          // If an authentication error occurs, assume token is expired
           console.error("Token expired or authentication failed:", error);
+          toast.error("Authentication failed. Please log in again.");
           removeCurrentUser();
         }
       } else {
         removeCurrentUser();
       }
-      
+      setLoading(false);
+    };
+    validateUser();
+  }, []);
+
+  const setCurrentUser = async (token: string, userid: string) => {
+    setLoading(true);
+    try {
+      localStorage.setItem("JWT", token);
+      localStorage.setItem("userId", userid);
+
+      const fetchedUser: User = await getUser(token, userid);
+      setUser({
+        ...fetchedUser,
+        fcmToken: fcmToken!,
+      });
+
+      await updateUser(token, userid, fetchedUser.username, fcmToken!, fetchedUser.notificationsEnabled);
+      setIsAdmin(fetchedUser.isAdmin);
+    } catch (error) {
+      console.error("Error setting current user:", error);
+      toast.error("Error setting current user. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
 
-  const setCurrentUser = async (token: string, userid: string) => {
-    if (typeof window !== 'undefined') { // Ensure we are in the browser
-      setLoading(true);
-      try {
-        // Store token and userId in local storage
-        localStorage.setItem("JWT", token);
-        localStorage.setItem("userId", userid);
-        
-        // Fetch user data
-        const user: User = await getUser(token, userid);
-        
-        // Update user with the fetched data and FCM token
-        await updateUser(token, userid, user.username, fcmToken!, true);
-        
-        // Set the user state
-        setUser({
-          _id: user._id,
-          email: user.email,
-          fcmToken: fcmToken!,
-          isAdmin: user.isAdmin,
-          notificationsEnabled: user.notificationsEnabled,
-          password: user.password, // Consider whether to expose the password
-          username: user.username
-        });
-        
-        setIsAdmin(user.isAdmin);
-      } catch (error) {
-        console.error("Error setting current user:", error);
-        // Handle errors accordingly, e.g., show a message to the user
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
   const removeCurrentUser = () => {
-    if (typeof window !== 'undefined') { // Ensure we are in the browser
-      localStorage.removeItem("JWT");
-      localStorage.removeItem("userId");
-    }
+    localStorage.removeItem("JWT");
+    localStorage.removeItem("userId");
     setUser(null);
-    setLoading(false);
     setIsAdmin(false);
+    setLoading(false);
   };
 
   return (

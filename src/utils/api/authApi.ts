@@ -17,7 +17,6 @@ export async function register(username: string, email: string, password: string
   }
 
   const data = await response.json();
-  console.log("User registered:", data);
   return data;
 }
 
@@ -39,7 +38,6 @@ export async function login(email: string, password: string) {
   }
 
   const data = await response.json();
-  console.log("User Logged in. Token:", data);
   return data;
 }
 

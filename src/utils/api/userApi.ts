@@ -21,7 +21,6 @@ export async function registerUser(username: string, email: string, password: st
   }
 
   const data = await response.json();
-  console.log("User registered:", data);
   return data;
 }
 

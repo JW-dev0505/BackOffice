@@ -4,6 +4,7 @@ import { MessagePayload, onMessage } from "firebase/messaging";
 import useFCMToken from "./useFCMToken";
 import { messaging } from "@/utils/lib/firebase";
 import { toast } from "react-toastify";
+import eventBus from "@/utils/lib/eventBus";
 
 const useFCM = () => {
   const fcmToken = useFCMToken();
@@ -22,8 +23,9 @@ const useFCM = () => {
             icon: payload.notification?.icon,
           });
         }
-        if (pathname === '/login') router.refresh();
+        eventBus.emit('messageUpdated', { message: 'New Message Arrived!' });
         setMessages((fcmMessages) => [...fcmMessages, payload]);
+        if (pathname === '/login') router.refresh();
       });
       return () => unsubscribe();
     }

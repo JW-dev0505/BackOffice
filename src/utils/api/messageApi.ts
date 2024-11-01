@@ -15,7 +15,6 @@ export async function getMessages(token: string, userid: string) {
   }
 
   const data = await response.json();
-  console.log("get message data : ", data);
   return data;
 }
 
@@ -28,8 +27,6 @@ export async function sendNotification(
   userid.forEach(async (userId) => {
     const user : User = await getUser(token, userId);
     const { fcmToken } = user;
-
-    console.log("send to one data: ", fcmToken,userId, title,body);
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/message/send-notification`, {
       method: 'POST',
@@ -60,7 +57,6 @@ export async function sendNotificationAll(
   users.forEach(async(user) => {
     const { fcmToken, _id } = user;
     
-    console.log("send all data: ", fcmToken,_id, title,body);
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/message/send-notification`, {
       method: 'POST',
       headers: {
@@ -68,7 +64,7 @@ export async function sendNotificationAll(
       },
       body: JSON.stringify({
         fcmToken,
-        _id,
+        userid: _id,
         title,
         body
       })

@@ -1,9 +1,9 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { getMessages, updateMessage } from '@/utils/api/messageApi';
 import { useAuth } from '@/context/AuthContext';
 import { Message } from '@/utils/types';
-import useFCM from '@/utils/hooks/useFCM';
+import eventBus from '@/utils/lib/eventBus';
 
 interface MessageContextType {
   messages: Message[];
@@ -18,27 +18,49 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const { fcmMessages } = useFCM();
 
-  // Effect to handle initial fetch and FCM messages
-  useEffect(() => {
-    fetchMessages(); // Fetch messages on user change}
-  }, [user, fcmMessages]);
-    
-  const fetchMessages = async () => {
-    if (user) {
-      const _token = localStorage.getItem('JWT');
-      const fetchedMessages = await getMessages(_token!, user._id);
-      setMessages(fetchedMessages);
-      setUnreadCount(fetchedMessages.filter((msg: Message) => !msg.isRead).length);
-    }
+  // Calculate unread messages count
+  const calculateUnreadCount = (messages: Message[]) => {
+    return messages.filter((msg) => !msg.isRead).length;
   };
 
+  // Fetch messages from the API and update state
+  const fetchMessages = useCallback(async () => {
+    if (user) {
+      const token = localStorage.getItem('JWT');
+      if (token) {
+        const fetchedMessages = await getMessages(token, user._id);
+        setMessages(fetchedMessages);
+        setUnreadCount(calculateUnreadCount(fetchedMessages));
+      }
+    }
+  }, [user]);
+
+  // Handle event-driven message updates
+  useEffect(() => {
+    const handleUpdateMessageEvent = async () => {
+      await fetchMessages();
+      console.log("Messages updated from event.");
+    };
+
+    eventBus.on("messageUpdated", handleUpdateMessageEvent);
+
+    return () => {
+      eventBus.off("messageUpdated", handleUpdateMessageEvent);
+    };
+  }, [fetchMessages]);
+
+  // Initial fetch when user changes
+  useEffect(() => {
+    fetchMessages();
+  }, [user, fetchMessages]);
+
+  // Mark message as read and update state
   const checkMessage = async (id: string) => {
     const message = messages.find((msg) => msg._id === id);
     if (message && !message.isRead) {
-      await updateMessage(id); // Call API to update message status
-      message.isRead = true; // Update locally
+      await updateMessage(id);
+      message.isRead = true;
       setMessages([...messages]);
       setUnreadCount(unreadCount - 1);
     }

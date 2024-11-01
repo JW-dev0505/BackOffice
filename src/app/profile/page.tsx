@@ -35,11 +35,7 @@ const ProfilePage = () => {
                 Edit Profile
               </button>
             </div>
-            {isEditing && (
-              <div className="mt-6 p-4 bg-gray-100 rounded-md shadow-inner">
-                <EditProfile onClose={() => setIsEditing(false)} />
-              </div>
-            )}
+            {isEditing && <EditProfile onClose={() => setIsEditing(false)} />}
           </div>
         ) : (
           <p className="text-red-500 text-center">User not found</p>
