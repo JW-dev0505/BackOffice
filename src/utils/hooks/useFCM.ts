@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 
 const useFCM = () => {
   const fcmToken = useFCMToken();
-  const [messages, setMessages] = useState<MessagePayload[]>([]);
+  const [fcmMessages, setMessages] = useState<MessagePayload[]>([]);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -17,13 +17,13 @@ const useFCM = () => {
       const unsubscribe = onMessage(fcmmessaging, (payload) => {
         toast.dark(payload.notification?.title);
         if (pathname === '/login') router.refresh();
-        setMessages((messages) => [...messages, payload]);
+        setMessages((fcmMessages) => [...fcmMessages, payload]);
       });
       return () => unsubscribe();
     }
   }, [fcmToken, pathname, router]);
 
-  return { fcmToken, messages };
+  return { fcmToken, fcmMessages };
 };
 
 export default useFCM;

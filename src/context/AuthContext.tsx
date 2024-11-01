@@ -21,9 +21,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { fcmToken } = useFCM(); 
 
   useEffect(() => {
-    if (fcmToken) {
-      // You can send the token to your backend here
-      console.log('FCM Token for sending notifications:', fcmToken);
+    if (fcmToken && user) {
+      const token = localStorage.getItem("JWT");
+      const userid = localStorage.getItem("userId");
+      updateUser(token!, userid!, user.username, fcmToken, user.notificationsEnabled)
     }
   }, [fcmToken]);
 

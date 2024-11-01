@@ -4,7 +4,6 @@ import { getMessages, updateMessage } from '@/utils/api/messageApi';
 import { useAuth } from '@/context/AuthContext';
 import { Message } from '@/utils/types';
 import useFCM from '@/utils/hooks/useFCM';
-import { MessagePayload } from 'firebase/messaging';
 
 interface MessageContextType {
   messages: Message[];
@@ -19,8 +18,13 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const { messages: fcmMessages } = useFCM(); // Get messages from FCM
+  const { fcmMessages } = useFCM();
 
+  // Effect to handle initial fetch and FCM messages
+  useEffect(() => {
+    fetchMessages(); // Fetch messages on user change}
+  }, [user, fcmMessages]);
+    
   const fetchMessages = async () => {
     if (user) {
       const _token = localStorage.getItem('JWT');
@@ -39,26 +43,6 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setUnreadCount(unreadCount - 1);
     }
   };
-
-  // Effect to handle initial fetch and FCM messages
-  useEffect(() => {
-    fetchMessages(); // Fetch messages on user change
-    // Assuming fcmMessages is of type MessagePayload[]
-    if (fcmMessages.length > 0) {
-      const lastMessage = fcmMessages[fcmMessages.length - 1]; // Get the last message from the array
-
-      const newMessage = {
-        _id: lastMessage.messageId || '', // Default to an empty string if messageId is not available
-        title: lastMessage.notification?.title || 'No Title', // Default title if not provided
-        body: lastMessage.notification?.body || 'No Body', // Default body if not provided
-        createdAt: new Date().toISOString(),
-        isRead: false, // Assuming new messages are unread
-      };
-
-      setMessages((prevMessages) => [...prevMessages, newMessage]); // Add new message
-      setUnreadCount((prevCount) => prevCount + 1); // Increment unread count
-    }
-  }, [user, fcmMessages]); // Run effect when user or fcmMessages change
 
   return (
     <MessageContext.Provider value={{ messages, unreadCount, fetchMessages, checkMessage }}>
