@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { sendNotification, sendNotificationAll } from '@/utils/api/messageApi';
 
 const AdminPanel = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
   const router = useRouter();
 
   const [message, setMessage] = useState('');
@@ -18,8 +18,8 @@ const AdminPanel = () => {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) router.push('/login');
-    else if (!isAdmin) router.push('/');
+    if (!user && !loading ) router.push('/login');
+    else if (!isAdmin && !loading) router.push('/');
   }, []);
 
   useEffect(() => {

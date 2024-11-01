@@ -33,6 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const checkUserValidate = async () => {
+    setLoading(true);
     if (typeof window !== 'undefined') { // Ensure we are in the browser
       const token = localStorage.getItem("JWT");
       const userid = localStorage.getItem("userId");
@@ -57,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const setCurrentUser = async (token: string, userid: string) => {
     if (typeof window !== 'undefined') { // Ensure we are in the browser
+      setLoading(true);
       try {
         // Store token and userId in local storage
         localStorage.setItem("JWT", token);

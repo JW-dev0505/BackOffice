@@ -5,12 +5,12 @@ import { useAuth } from '@/context/AuthContext';
 import EditProfile from '@/components/EditProfile';
 
 const ProfilePage = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    if (!user) router.push('/login');
+    if (!user && !loading) router.push('/login');
   }, [user, router]);
 
   return (

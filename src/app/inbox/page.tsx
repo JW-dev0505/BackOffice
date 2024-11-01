@@ -7,14 +7,14 @@ import MessageModal from '@/components/MessageModal';
 import { Message } from '@/utils/types';
 
 const InboxPage = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const { messages, checkMessage } = useMessage();
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    if (!user) router.push('/login');
+    if (!user && !loading ) router.push('/login');
   }, [user, router]);
 
   const handleCheckMessage = async (id: string) => {

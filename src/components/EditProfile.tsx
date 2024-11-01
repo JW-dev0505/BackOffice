@@ -14,7 +14,7 @@ const EditProfile: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (user) {
       try {
         const token = localStorage.getItem("JWT");
-        updateUser(token!, user._id, displayName, user.fcmToken, true);
+        await updateUser(token!, user._id, displayName, user.fcmToken, true);
         toast.success("Profile update successfully!");
         onClose(); // Close the form after updating
       } catch (error) {
