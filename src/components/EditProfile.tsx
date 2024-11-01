@@ -5,7 +5,7 @@ import { updateUser } from '@/utils/api/userApi';
 import { toast } from 'react-toastify';
 
 const EditProfile: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [displayName, setDisplayName] = useState(user?.username || '');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -14,7 +14,8 @@ const EditProfile: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     if (user) {
       try {
         const token = localStorage.getItem("JWT");
-        await updateUser(token!, user._id, displayName, user.fcmToken, true);
+        const newUser = await updateUser(token!, user._id, displayName, user.fcmToken, true);
+        setUser(newUser);
         toast.success("Profile update successfully!");
         onClose(); // Close the form after updating
       } catch (error) {
@@ -35,8 +36,10 @@ const EditProfile: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           required
         />
       </div>
-      <button type="submit" className="mt-4 bg-blue-500 text-white p-2 rounded">Update Profile</button>
-      <button type="button" onClick={onClose} className="mt-2 ml-2 bg-gray-500 text-white p-2 rounded">Cancel</button>
+      <div className='flex justify-around'>
+        <button type="button" onClick={onClose} className="mt-2 ml-2 bg-gray-500 text-white p-2 rounded">Cancel</button>
+        <button type="submit" className="mt-4 bg-blue-500 text-white p-2 rounded">Update Profile</button>
+      </div>
     </form>
   );
 };

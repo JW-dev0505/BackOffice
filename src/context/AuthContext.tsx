@@ -8,6 +8,7 @@ interface AuthContextProps {
   user: User | null;
   loading: boolean;
   isAdmin: boolean;
+  setUser: (user : User | null) => void;
   setCurrentUser: (token: string, userid: string) => void;
   removeCurrentUser: () => void;
 }
@@ -90,7 +91,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
   };
-  
 
   const removeCurrentUser = () => {
     if (typeof window !== 'undefined') { // Ensure we are in the browser
@@ -103,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, setCurrentUser, removeCurrentUser }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, setUser, setCurrentUser, removeCurrentUser }}>
       {children}
     </AuthContext.Provider>
   );
